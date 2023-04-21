@@ -133,35 +133,33 @@ public abstract class InsertField<R extends ConnectRecord<R>> implements Transfo
 		schemaUpdateCache = new SynchronizedCache<>(new LRUCache<>(16));
 	}
 
-	private static Byte castToInt8(String value) {
-		return Byte.parseByte(value);
-	}
-
-	private static Short castToInt16(String value) {
-		return Short.parseShort(value);
-	}
-
-	private static Integer castToInt32(String value) {
-		return Integer.parseInt(value);
-	}
-
-	private static Long castToInt64(String value) {
-		return Long.parseLong(value);
-	}
-
-	private static Float castToFloat32(String value) {
-		return Float.parseFloat(value);
-
-	}
-
-	private static Double castToFloat64(String value) {
-		return Double.parseDouble(value);
-
-	}
-
-	private static Boolean castToBoolean(String value) {
-		return Boolean.parseBoolean(value);
-
+	private static <T> T castToType(String value, String typeName) {
+		switch (typeName.toLowerCase()) {
+		case "byte":
+		case "int8":
+			return (T) Byte.valueOf(value);
+		case "short":
+		case "int16":
+			return (T) Short.valueOf(value);
+		case "int":
+		case "int32":
+			return (T) Integer.valueOf(value);
+		case "long":
+		case "int64":
+			return (T) Long.valueOf(value);
+		case "float":
+		case "float32":
+			return (T) Float.valueOf(value);
+		case "double":
+		case "float64":
+			return (T) Double.valueOf(value);
+		case "boolean":
+			return (T) Boolean.valueOf(value);
+		case "string":
+			return (T) value;
+		default:
+			throw new IllegalArgumentException("Unsupported type: " + typeName);
+		}
 	}
 
 	@Override
@@ -193,38 +191,7 @@ public abstract class InsertField<R extends ConnectRecord<R>> implements Transfo
 			updatedValue.put(timestampField.name, record.timestamp());
 		}
 		if (staticField != null && staticValue != null) {
-
-			try {
-				switch (staticType) {
-				case "int8":
-					updatedValue.put(staticField.name, castToInt8(staticValue));
-					break;
-				case "int16":
-					updatedValue.put(staticField.name, castToInt16(staticValue));
-					break;
-				case "int32":
-					updatedValue.put(staticField.name, castToInt32(staticValue));
-					break;
-				case "int64":
-					updatedValue.put(staticField.name, castToInt64(staticValue));
-					break;
-				case "float32":
-					updatedValue.put(staticField.name, castToFloat32(staticValue));
-					break;
-				case "float64":
-					updatedValue.put(staticField.name, castToFloat64(staticValue));
-					break;
-				case "boolean":
-					updatedValue.put(staticField.name, castToBoolean(staticValue));
-					break;
-				default:
-					updatedValue.put(staticField.name, staticValue);
-					break;
-				}
-			} catch (Exception e) {
-				throw e;
-			}
-
+			updatedValue.put(staticField.name, castToType(staticValue, staticType));
 		}
 
 		return newRecord(record, null, updatedValue);
@@ -258,37 +225,7 @@ public abstract class InsertField<R extends ConnectRecord<R>> implements Transfo
 			updatedValue.put(timestampField.name, new Date(record.timestamp()));
 		}
 		if (staticField != null && staticValue != null) {
-
-			try {
-				switch (staticType) {
-				case "int8":
-					updatedValue.put(staticField.name, castToInt8(staticValue));
-					break;
-				case "int16":
-					updatedValue.put(staticField.name, castToInt16(staticValue));
-					break;
-				case "int32":
-					updatedValue.put(staticField.name, castToInt32(staticValue));
-					break;
-				case "int64":
-					updatedValue.put(staticField.name, castToInt64(staticValue));
-					break;
-				case "float32":
-					updatedValue.put(staticField.name, castToFloat32(staticValue));
-					break;
-				case "float64":
-					updatedValue.put(staticField.name, castToFloat64(staticValue));
-					break;
-				case "boolean":
-					updatedValue.put(staticField.name, castToBoolean(staticValue));
-					break;
-				default:
-					updatedValue.put(staticField.name, staticValue);
-					break;
-				}
-			} catch (Exception e) {
-				throw e;
-			}
+			updatedValue.put(staticField.name, castToType(staticValue, staticType));
 		}
 
 		return newRecord(record, updatedSchema, updatedValue);
@@ -350,8 +287,6 @@ public abstract class InsertField<R extends ConnectRecord<R>> implements Transfo
 						staticField.optional ? Schema.OPTIONAL_STRING_SCHEMA : Schema.STRING_SCHEMA);
 				break;
 			}
-
-
 		}
 
 		return builder.build();
