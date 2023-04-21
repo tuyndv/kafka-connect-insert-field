@@ -10,7 +10,7 @@ Properties:
 Example on how to add to your connector:
 ```
 "transforms": "InsertField",
-"transforms.InsertField.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+"transforms.InsertField.type": "com.github.tuyndv.kafka.connect.smt.InsertField$Value",
 "transforms.InsertField.static.field": "MessageTypeId",
 "transforms.InsertField.static.type": "int32",
 "transforms.InsertField.static.value": "1"
